@@ -56,6 +56,7 @@ describe("seat editor", () => {
 
   it("disables continue at 119 and shows what is left", async () => {
     await renderEditor();
+    fireEvent.click(screen.getByRole("button", { name: "התחל מהסקרים" }));
     minus("הליכוד");
     expect(value("הליכוד")).toBe(22);
     expect(counter()).toContain("הוקצו 119 / 120");
@@ -65,6 +66,7 @@ describe("seat editor", () => {
 
   it("caps each list at its value plus the remaining seats", async () => {
     await renderEditor();
+    fireEvent.click(screen.getByRole("button", { name: "התחל מהסקרים" }));
     slide("הליכוד", 60);
     expect(value("הליכוד")).toBe(23);
     slide("הליכוד", 15);
@@ -93,6 +95,7 @@ describe("seat editor", () => {
 
   it("does not jump to 4 when fewer than 4 seats remain", async () => {
     await renderEditor();
+    fireEvent.click(screen.getByRole("button", { name: "התחל מהסקרים" }));
     slide("הליכוד", 21);
     plus("עמך ישראל");
     expect(value("עמך ישראל")).toBe(0);
