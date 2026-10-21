@@ -1,0 +1,20 @@
+# vote.almog.uk — Cloudflare Tunnel routes to http://<host>:7332
+name: election-voting
+
+services:
+  app:
+    build: .
+    image: election-voting:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7332:3000"
+    environment:
+      DATABASE_URL: file:./data/app.db
+      ADMIN_SECRET: ${ADMIN_SECRET:?ADMIN_SECRET must be set, see .env.example}
+      # Cloudflare overwrites this header on every request; used for the registration rate limit.
+      TRUST_PROXY_HEADER: ${TRUST_PROXY_HEADER:-cf-connecting-ip}
+    volumes:
+      - election-data:/app/prisma/data
+
+volumes:
+  election-data:

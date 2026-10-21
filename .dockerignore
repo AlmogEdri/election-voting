@@ -1,0 +1,15 @@
+.git
+.github
+.next
+node_modules
+coverage
+data
+prisma/data
+*.db
+*.db-journal
+.env
+.env.*
+!.env.example
+docs
+*.md
+*.png

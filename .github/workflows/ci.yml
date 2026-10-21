@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Sequential on purpose: lint → tests → build → smoke.
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - name: Smoke test (disposable database)
+        env:
+          DATABASE_URL: file:/tmp/ci-smoke.db
+          ADMIN_SECRET: ci-smoke-secret
+        run: |
+          npm run db:setup
+          npx next start -H 127.0.0.1 -p 3000 > /tmp/next.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3000/api/parties > /dev/null && break; sleep 1; done
+          scripts/smoke.sh http://127.0.0.1:3000 || { cat /tmp/next.log; exit 1; }
+
+  # Runs on the self-hosted runner on almog-server once the owner enables it:
+  # repository variable DEPLOY_ENABLED=true and secret ADMIN_SECRET. See docs/DEPLOY.md.
+  deploy:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
+    runs-on: self-hosted
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and restart
+        env:
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+        run: docker compose up -d --build
+      - name: Wait until healthy
+        run: |
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:7332/api/parties > /dev/null && exit 0; sleep 2; done
+          docker compose logs --tail 100 app
+          exit 1

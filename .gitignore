@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# databases (SQLite files live in prisma/data/ when DATABASE_URL=file:./data/app.db)
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# env
+.env
+.env.*
+!.env.example
+
+# misc
+.DS_Store
+*.log
+coverage/
+*.png

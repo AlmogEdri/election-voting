@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f8fafc;
+  --fg: #0f172a;
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Hebrew", Arial, sans-serif;
+}
+
+/* Seat slider. Right-to-left: 0 is on the right. The track shows the current
+   value (party color), the reachable range up to the cap, and the blocked rest. */
+.seat-range {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 2.25rem;
+  background: transparent;
+  direction: rtl;
+  touch-action: pan-y;
+}
+.seat-range:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 9999px;
+}
+.seat-range::-webkit-slider-runnable-track {
+  height: 0.6rem;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to left,
+    var(--seat-color) 0 var(--seat-fill),
+    #cbd5e1 var(--seat-fill) var(--seat-cap),
+    #f1f5f9 var(--seat-cap) 100%
+  );
+}
+.seat-range::-moz-range-track {
+  height: 0.6rem;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to left,
+    var(--seat-color) 0 var(--seat-fill),
+    #cbd5e1 var(--seat-fill) var(--seat-cap),
+    #f1f5f9 var(--seat-cap) 100%
+  );
+}
+.seat-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: -0.575rem;
+  border-radius: 9999px;
+  background: #fff;
+  border: 3px solid var(--seat-color);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+}
+.seat-range::-moz-range-thumb {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background: #fff;
+  border: 3px solid var(--seat-color);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+}
+.seat-range:disabled {
+  opacity: 0.45;
+}
