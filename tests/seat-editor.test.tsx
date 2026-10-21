@@ -41,8 +41,12 @@ describe("seat editor", () => {
     expect(html).toContain("אפס הכול");
   });
 
-  it("starts from the poll defaults with continue enabled", async () => {
+  it("starts from zero with continue disabled until the polls are loaded", async () => {
     await renderEditor();
+    expect(counter()).toContain("הוקצו 0 / 120");
+    expect(value("הליכוד")).toBe(0);
+    expect(continueButton().disabled).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "התחל מהסקרים" }));
     expect(counter()).toContain("הוקצו 120 / 120");
     expect(value("הליכוד")).toBe(23);
     expect(continueButton().disabled).toBe(false);
@@ -96,6 +100,8 @@ describe("seat editor", () => {
 
   it("resets and restores the poll defaults", async () => {
     await renderEditor();
+    fireEvent.click(screen.getByRole("button", { name: "התחל מהסקרים" }));
+    expect(value("הליכוד")).toBe(23);
     fireEvent.click(screen.getByRole("button", { name: "אפס הכול" }));
     expect(value("הליכוד")).toBe(0);
     expect(continueButton().disabled).toBe(true);

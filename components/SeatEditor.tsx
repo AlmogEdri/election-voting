@@ -24,7 +24,7 @@ export function SeatEditor({ config }: { config: PublicConfig }) {
   const router = useRouter();
   const device = useDevice();
   const ballot = useBallot();
-  const [seats, setSeatsState] = useState<SeatMap>(() => defaultSeatMap(config.parties));
+  const [seats, setSeatsState] = useState<SeatMap>(() => zeroSeats(config.parties));
   const initialized = useRef(false);
   const touched = useRef(false);
 
@@ -32,7 +32,7 @@ export function SeatEditor({ config }: { config: PublicConfig }) {
     if (device.status === "anonymous") router.replace("/");
   }, [device.status, router]);
 
-  // Starting point, once identity and draft are known: current draft > saved vote > poll defaults.
+  // Starting point, once identity and draft are known: current draft > saved vote > all zeros (the poll defaults stay behind the button).
   useEffect(() => {
     if (initialized.current || !ballot.hydrated || device.status === "loading") return;
     initialized.current = true;
