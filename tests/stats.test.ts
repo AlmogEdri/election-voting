@@ -37,7 +37,27 @@ describe("stats", () => {
     expect(stats.avgSeats["blue-white"]).toBe(0);
     expect(stats.pmShare).toMatchObject({ netanyahu: 50, eisenkot: 50, bennett: 0, "new-elections": 0 });
     expect(stats.names).toEqual(["אבי", "בתיה"]);
+    expect(stats.ballots.map((b) => b.name)).toEqual(["אבי", "בתיה"]);
+    expect(stats.ballots[1]).toMatchObject({ pmCandidateId: "eisenkot", score: null, seats: expect.objectContaining({ likud: 18 }) });
+    expect(stats.realResults).toBeNull();
     expect(JSON.stringify(stats)).not.toContain(a.deviceToken);
+  });
+
+  it("ranks ballots once the official results are entered", async () => {
+    const { saveRealResults } = await import("@/lib/admin");
+    const a = await registerUser("אבי", "10.0.0.1");
+    const b = await registerUser("בתיה", "10.0.0.2");
+    await saveVote(a.userId, { seats: SEED_SEATS, pmCandidateId: "netanyahu" }, NOW);
+    await saveVote(b.userId, { seats: { ...SEED_SEATS, likud: 18, yashar: 26 }, pmCandidateId: "new-elections" }, NOW);
+    expect((await saveRealResults({ seats: { ...SEED_SEATS, likud: 20, yashar: 24 }, pmCandidateId: "new-elections" })).ok).toBe(true);
+
+    const stats = await getCachedStats(NOW.getTime());
+    expect(stats.realResults).toMatchObject({ pmCandidateId: "new-elections", seats: expect.objectContaining({ likud: 20 }) });
+    // אבי: |23-20|+|21-24| = 6, wrong PM → 6. בתיה: |18-20|+|26-24| = 4, right PM → -6.
+    expect(stats.ballots.map((x) => [x.name, x.score?.total, x.score?.rank])).toEqual([["בתיה", -6, 1], ["אבי", 6, 2]]);
+
+    expect((await saveRealResults({ clear: true })).ok).toBe(true);
+    expect((await getCachedStats(NOW.getTime())).ballots.every((x) => x.score === null)).toBe(true);
   });
 
   it("caches for ten seconds and is invalidated by a vote", async () => {
@@ -60,6 +80,6 @@ describe("stats", () => {
     const res = await statsRoute();
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(Object.keys(body).sort()).toEqual(["avgSeats", "locked", "names", "participants", "pmShare"]);
+    expect(Object.keys(body).sort()).toEqual(["avgSeats", "ballots", "locked", "names", "participants", "pmShare", "realResults"]);
   });
 });

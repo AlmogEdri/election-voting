@@ -9,6 +9,7 @@ import { formatLockAt } from "@/lib/lock";
 import { restoreSeatMap } from "@/lib/seats";
 import { useDevice } from "./DeviceProvider";
 import { SeatComparisonChart } from "./SeatComparisonChart";
+import { Participants } from "./Participants";
 import { ShareButton } from "./ShareButton";
 
 export const POLL_INTERVAL_MS = 30_000;
@@ -39,6 +40,11 @@ export function Results({ config, initialStats }: { config: PublicConfig; initia
         </p>
       </header>
 
+      {stats.realResults && (
+        <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+          התוצאות האמיתיות הוזנו. ראש הממשלה בפועל: <strong>{config.pmCandidates.find((c) => c.id === stats.realResults?.pmCandidateId)?.name ?? "?"}</strong>. הדירוג למטה.
+        </p>
+      )}
       <div className="space-y-2">
         {device.status === "ready" && myVote && !locked && (
           <Link
@@ -98,22 +104,7 @@ export function Results({ config, initialStats }: { config: PublicConfig; initia
         </ul>
       </section>
 
-      <section aria-labelledby="names-title" className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-        <h2 id="names-title" className="text-lg font-bold">
-          מי הצביע ({stats.names.length})
-        </h2>
-        {stats.names.length > 0 ? (
-          <ul className="mt-2 flex flex-wrap gap-2">
-            {stats.names.map((name) => (
-              <li key={name} className="rounded-full bg-slate-100 px-3 py-1 text-sm">
-                {name}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-2 text-sm text-slate-600">עדיין אף אחד.</p>
-        )}
-      </section>
+      <Participants config={config} ballots={stats.ballots} realResults={stats.realResults} />
     </main>
   );
 }

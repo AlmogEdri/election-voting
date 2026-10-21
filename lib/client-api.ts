@@ -57,11 +57,20 @@ async function call<T>(path: string, init: { method?: string; body?: unknown; he
 
 export type Me = { user: { id: string; name: string }; vote: SavedVote | null };
 export type Ballot = { seats: SeatMap; pmCandidateId: string };
+export type BallotEntry = {
+  name: string;
+  seats: SeatMap;
+  pmCandidateId: string;
+  updatedAt: string;
+  score: { deviation: number; pmCorrect: boolean; total: number; rank: number } | null;
+};
 export type PublicStats = {
   participants: number;
   avgSeats: Record<string, number>;
   pmShare: Record<string, number>;
   names: string[];
+  ballots: BallotEntry[];
+  realResults: { seats: SeatMap; pmCandidateId: string; enteredAt: string } | null;
   locked: boolean;
 };
 

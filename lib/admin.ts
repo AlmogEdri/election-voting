@@ -214,11 +214,13 @@ export async function updateConfiguration(input: unknown): Promise<AdminResult> 
 export async function saveRealResults(input: unknown): Promise<AdminResult> {
   if (input === null || (isObject(input) && input.clear === true)) {
     await writeSetting(prisma, SETTING_KEYS.realResults, null);
+    invalidateStats();
     return { ok: true, value: null };
   }
   const ballot = validateBallot(input, await getBallotConfig(prisma));
   if (!ballot.ok) return bad(ballot.error);
   await writeSetting(prisma, SETTING_KEYS.realResults, { ...ballot.value, enteredAt: new Date().toISOString() });
+  invalidateStats();
   return { ok: true, value: null };
 }
 
